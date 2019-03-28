@@ -5,12 +5,14 @@
   "main": "index.js",
   "scripts": {
     "test": "",
-    "dev": "nodemon $NODE_DEBUG_OPTION index.js"
+    "dev": "node $NODE_DEBUG_OPTION index.js",
+    "nodemon": "nodemon $NODE_DEBUG_OPTION index.js"
   },
   "author": "Jorge Orpinel",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.16.4"
+    "express": "^4.16.4",
+    "sqlite": "^3.0.3"
   },
   "devDependencies": {
     "nodemon": "^1.18.10"
