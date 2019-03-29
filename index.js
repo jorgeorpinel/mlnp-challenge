@@ -2,8 +2,7 @@ const express = require('express')
 // TODO: Use SQLite as db
 
 const app = express()
-app.use(express.json())
-const port = 3000
+const port = process.env.PORT || 3000
 
 // app.use('/static', express.static(path.join(__dirname, 'static')))
 
@@ -69,12 +68,13 @@ app.get(/\/..*/, (req, res) => {
   // TODO: Sanitize and look for corresponding URL in db
 
   // TODO: Redirect or return 404
+  // res.redirect(
 
   res.send('WIP GET')
 })
 
 // Start server app
-app.listen(port, () => console.log(`Example app listening on ${port}!`))
+app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 
 // TODO: Use basic mocha tests
 

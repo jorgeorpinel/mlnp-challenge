@@ -6,7 +6,8 @@
   "scripts": {
     "test": "",
     "dev": "node $NODE_DEBUG_OPTION index.js",
-    "nodemon": "nodemon $NODE_DEBUG_OPTION index.js"
+    "nodemon": "nodemon $NODE_DEBUG_OPTION index.js",
+    "start": "node index.js"
   },
   "author": "Jorge Orpinel",
   "license": "ISC",
