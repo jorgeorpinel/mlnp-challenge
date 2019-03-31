@@ -31,15 +31,13 @@ app.post('/', (req, res) => {
   const url = require('url')
   if (req.body.url)
     longURL = url.parse(req.body.url)
-  // console.debug('Parsed URL', longURL)
+  console.debug('Parsed URL', longURL)
   if (!longURL || !longURL.host) {
     res.status(400).json({error: "No URL detected in request."})
     return
   }
-  // const URL = require('url').URL
-  // const myURL = new URL(req.body.url)
-  // console.debug('myURL', myURL)
-  // // ...Catch TypeError [ERR_INVALID_URL]
+  // TODO: Try using longURL.href instead of req.body.url from here on
+  //       to avoid different entries for equivalent URLs e.g. ...com vs ...com/
 
   // db.serialize(() => {
     let permalink = false
@@ -53,14 +51,14 @@ app.post('/', (req, res) => {
         // TODO: Return short URL if found.
         permalink = row.permalink
         console.info('Found permalink', permalink)
-        res.json({short: `${req.hostname}${port!=8080?`:${port}`:''}/${permalink}`})
+        res.json({short: `${req.hostname}${process.env.PORT?'':`:${port}`}/${permalink}`})
         return
       }
 
       // 2.2 Create new short URL
       // TODO: Check that new permalink doesn't exist yet in db! (Unlikely)
       permalink = randomstr.generate(7)
-      console.debug('permalink', permalink)
+      console.debug('New permalink', permalink)
 
       // 3. Save pair to db
       // TODO: Sanitize longURL! https://github.com/mapbox/node-sqlite3/wiki/API#statement
@@ -71,7 +69,7 @@ app.post('/', (req, res) => {
           res.status(500).json({error: err.message})
         }
         console.debug('this.lastID', this.lastID)
-        res.json({short: `${req.hostname}${port!=8080?`:${port}`:''}/${permalink}`})
+        res.json({short: `${req.hostname}${process.env.PORT?'':`:${port}`}/${permalink}`})
 
         // TODO: Return text/plain depending on Accept header?
       })
