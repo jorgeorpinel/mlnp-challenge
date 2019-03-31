@@ -13,7 +13,8 @@
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.4",
-    "sqlite": "^3.0.3"
+    "randomstring": "^1.1.5",
+    "sqlite3": "^4.0.6"
   },
   "devDependencies": {
     "nodemon": "^1.18.10"

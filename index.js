@@ -1,10 +1,18 @@
 const express = require('express')
-// TODO: Use SQLite as db
+const sqlite3 = require('sqlite3').verbose()
+const randomstr = require('randomstring')
 
 const app = express()
 const port = process.env.PORT || 3000
 
+// express.json() middleware expects and parses POST payloads as JSON.
+app.use(express.json())
 // app.use('/static', express.static(path.join(__dirname, 'static')))
+
+// const db = new sqlite3.Database(':memory:')
+const db = new sqlite3.Database('db.sqlite')
+
+db.run('CREATE TABLE IF NOT EXISTS url_permalink (url TEXT, saved INTEGER, permalink TEXT, requested INTEGER)')
 
 /*
  * POST /
@@ -13,13 +21,9 @@ const port = process.env.PORT || 3000
  * Returns JSON object with short URL: {url: `${HOST}/short`}
  */
 app.post('/', (req, res) => {
-  // console.debug('req.headers', req.headers)
 
   // 0. Get POST data
   // console.debug('req.body', req.body)
-
-  // console.debug('req.params', req.params)
-  // console.debug('req.query', req.query)
 
   // 1. Validate URL from payload
   // console.debug('req.body.url', req.body.url)
@@ -29,8 +33,7 @@ app.post('/', (req, res) => {
     longURL = url.parse(req.body.url)
   // console.debug('Parsed URL', longURL)
   if (!longURL || !longURL.host) {
-    res.status(400)
-    res.json({error: "No URL detected in request."})
+    res.status(400).json({error: "No URL detected in request."})
     return
   }
   // const URL = require('url').URL
@@ -38,21 +41,51 @@ app.post('/', (req, res) => {
   // console.debug('myURL', myURL)
   // // ...Catch TypeError [ERR_INVALID_URL]
 
-  // TODO: 2. Check db for pre-existing URL
-  //  Return short URL if found.
+  // db.serialize(() => {
+    let permalink = false
 
-  // TODO: 3. Create new short URL
-  //  Save pair to db
-  //  Return short URL to text/plain
-  //  + or text/html depending on Accept header
+    // 2. Get short URL
+    db.get(`SELECT permalink FROM url_permalink WHERE url = '${req.body.url}'`, (err, row) => {
+      console.debug(`SELECT permalink FROM url_permalink WHERE url = '${req.body.url}'`)
+      // 2.1 Check db for previously saved URL
+      console.debug('row', row)
+      if (row && row.permalink) {
+        // TODO: Return short URL if found.
+        permalink = row.permalink
+        console.info('Found permalink', permalink)
+        res.json({short: `${req.hostname}${port!=8080?`:${port}`:''}/${permalink}`})
+        return
+      }
 
-  // console.debug('res.url', res.url)
-  // console.debug('res._parsedUrl', res._parsedUrl)
+      // 2.2 Create new short URL
+      // TODO: Check that new permalink doesn't exist yet in db! (Unlikely)
+      permalink = randomstr.generate(7)
+      console.debug('permalink', permalink)
+
+      // 3. Save pair to db
+      // TODO: Sanitize longURL! https://github.com/mapbox/node-sqlite3/wiki/API#statement
+      db.run(`INSERT INTO url_permalink VALUES ('${req.body.url}', 1, '${permalink}', 0)`, (err) => {
+        console.debug(`INSERT INTO url_permalink VALUES ('${req.body.url}', 1, '${permalink}', 0)`)
+        if(err) {
+          console.error(err)
+          res.status(500).json({error: err.message})
+        }
+        console.debug('this.lastID', this.lastID)
+        res.json({short: `${req.hostname}${port!=8080?`:${port}`:''}/${permalink}`})
+
+        // TODO: Return text/plain depending on Accept header?
+      })
+    })
+  // })
+
   // console.debug('res.statusCode', res.statusCode)
-
-  res.send('WIP POST')
 })
 
+/**
+ * HTTP GET /
+ * 404 (Not Found) with useful error message
+ * TODO: Render HTML page with usage info
+ */
 app.get('/', function(req, res){
   res.status(404).json({error: "Permalink required (in the request URL path)."}); // <== YOUR JSON DATA HERE
 });
@@ -79,9 +112,15 @@ app.listen(port, () => console.log(`Example app listening on port ${port}!`))
 // TODO: Use basic mocha tests
 
 /**
- * Send JSON response with any 5xx errors.
+ * Send JSON response for unexpected 5xx errors.
  */
 app.use(function (err, req, res, next) {
   console.error(err.stack)
   res.status(500).json({error: err.message})
 })
+
+// // From https://stackoverflow.com/a/42928185/761963
+// process.on('SIGINT', () => {
+//   db.close()
+//   // server.close()
+// })
