@@ -45,8 +45,14 @@ app.post('/', (req, res) => {
     // 2. Get short URL
     db.get(`SELECT permalink FROM url_permalink WHERE url = '${req.body.url}'`, (err, row) => {
       console.debug(`SELECT permalink FROM url_permalink WHERE url = '${req.body.url}'`)
-      // 2.1 Check db for previously saved URL
       console.debug('row', row)
+
+      if(err) {
+        console.error(err)
+        res.status(500).json({error: err.message})
+      }
+
+      // 2.1 Check db for previously saved URL
       if (row && row.permalink) {
         // TODO: Return short URL if found.
         permalink = row.permalink
@@ -68,15 +74,14 @@ app.post('/', (req, res) => {
           console.error(err)
           res.status(500).json({error: err.message})
         }
-        console.debug('this.lastID', this.lastID)
+        // // TODO: Why is this.lastID undefined below?
+        // console.debug('this.lastID', this.lastID)
         res.json({short: `${req.hostname}${process.env.PORT?'':`:${port}`}/${permalink}`})
 
         // TODO: Return text/plain depending on Accept header?
       })
     })
   // })
-
-  // console.debug('res.statusCode', res.statusCode)
 })
 
 /**
@@ -85,23 +90,38 @@ app.post('/', (req, res) => {
  * TODO: Render HTML page with usage info
  */
 app.get('/', function(req, res){
-  res.status(404).json({error: "Permalink required (in the request URL path)."}); // <== YOUR JSON DATA HERE
+  res.status(404).json({error: "Please POST JSON object with 'url' string property."});
 });
 
 /*
- * TODO: GET /{anything}
+ * GET /{anything}
  * Redirects to corresponding long URL.
  */
 app.get(/\/..*/, (req, res) => {
-  // TODO: Get path from requested URL
-  console.debug(req.url)
+  // 0. Get permalink from requested URL/path
+  // console.debug(req.url)
+  // const url = require('url')
+  // console.debug(url.parse(req.url))
+  let shortURL = req.url.split('/').pop()
+  console.debug('shortURL', shortURL)
 
-  // TODO: Sanitize and look for corresponding URL in db
+  // 1. Look for corresponding URL in db
+  // TODO: Sanitize shortURL! https://github.com/mapbox/node-sqlite3/wiki/API#statement
+  db.get(`SELECT url FROM url_permalink WHERE permalink = '${shortURL}'`, (err, row) => {
+    console.debug(`SELECT url FROM url_permalink WHERE permalink = '${shortURL}'`)
+    console.debug('row', row)
 
-  // TODO: Redirect or return 404
-  // res.redirect(
+    if(err) {
+      console.error(err)
+      res.status(500).json({error: err.message})
+    }
 
-  res.send('WIP GET')
+    // 2. Redirect or return 404
+    if (row && row.url)
+      res.redirect(row.url)
+    else
+      res.status(404).json({error: `Sorry, we don't recognize that URL.`});
+  })
 })
 
 // Start server app
