@@ -2,6 +2,8 @@ const express = require('express')
 const sqlite3 = require('sqlite3').verbose()
 const randomstr = require('randomstring')
 
+// TODO: Separate key business logic in pure javascript code (classes/functions) decoupled from express and use vanilla mocha to test that.
+
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -126,8 +128,6 @@ app.get(/\/..*/, (req, res) => {
 
 // Start server app
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
-
-// TODO: Use basic mocha tests
 
 /**
  * Send JSON response for unexpected 5xx errors.
