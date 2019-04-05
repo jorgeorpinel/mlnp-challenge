@@ -42,8 +42,8 @@ app.post('/', (req, res) => {
     try {
       shortener = new URLShortener(req.body.url)
     } catch (err) {
-      console.debug('err', err)
-      res.status(404).json({error: err})
+      // console.debug('new URLShortener threw', err.message)
+      res.status(404).json({error: err.message})
       return
     }
   } else {
@@ -57,8 +57,8 @@ app.post('/', (req, res) => {
   // 2. Get short URL
   // TODO: Sanitize shortener.url! https://github.com/mapbox/node-sqlite3/wiki/API#statement
   db.get(`SELECT permalink FROM url_permalink WHERE url = '${shortener.url}'`, (err, row) => {
-    console.debug(`SELECT permalink FROM url_permalink WHERE url = '${shortener.url}'`)
-    console.debug('row', row)
+    // console.debug(`SELECT permalink FROM url_permalink WHERE url = '${shortener.url}'`)
+    // console.debug('row', row)
 
     if(err) {
       console.error(err)
@@ -77,11 +77,11 @@ app.post('/', (req, res) => {
     // 2.2 Create new short URL
     // TODO: Check that new permalink doesn't exist yet in db! (Unlikely)
     permalink = randomstr.generate(7)
-    console.debug('New permalink', permalink)
+    // console.debug('New permalink', permalink)
 
     // 3. Save pair to db
     db.run(`INSERT INTO url_permalink VALUES ('${shortener.url}', 1, '${permalink}', 0)`, (err) => {
-      console.debug(`INSERT INTO url_permalink VALUES ('${shortener.url}', 1, '${permalink}', 0)`)
+      // console.debug(`INSERT INTO url_permalink VALUES ('${shortener.url}', 1, '${permalink}', 0)`)
       if(err) {
         console.error(err)
         res.status(500).json({error: err.message})
@@ -114,13 +114,13 @@ app.get(/\/..*/, (req, res) => {
   // const url = require('url')
   // console.debug(url.parse(req.url))
   let shortURL = req.url.split('/').pop()
-  console.debug('shortURL', shortURL)
+  // console.debug('shortURL', shortURL)
 
   // 1. Look for corresponding URL in db
   // TODO: Sanitize shortURL! https://github.com/mapbox/node-sqlite3/wiki/API#statement
   db.get(`SELECT url FROM url_permalink WHERE permalink = '${shortURL}'`, (err, row) => {
-    console.debug(`SELECT url FROM url_permalink WHERE permalink = '${shortURL}'`)
-    console.debug('row', row)
+    // console.debug(`SELECT url FROM url_permalink WHERE permalink = '${shortURL}'`)
+    // console.debug('row', row)
 
     if(err) {
       console.error(err)
