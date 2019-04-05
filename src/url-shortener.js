@@ -5,16 +5,18 @@ module.exports = class URLShortener {
     // Defines class properties.
     this.url = ''
 
-    // 1. Validates URL.
+    // Validates URL.
+    let parsedURL
     if (urlString)
-      this.url = url.parse(urlString)
-    // console.debug('URLShortener: Parsed URL', this.url)
-    if (!this.url || !this.url.host)
+      parsedURL = url.parse(urlString)
+    // console.debug('URLShortener: Parsed URL', parsedURL)
+    if (!parsedURL || !parsedURL.host)
       throw new Error("URL sent is not valid.")
-    this.url = urlString
-    // TODO: Try using this.url.href instead of req.body.url from here on
-    //       to avoid different entries for equivalent URLs e.g. ...com vs ...com/
-  }
+    if('Malformed.%20url' == parsedURL.href)
+      throw new Error("URL sent is malformed.")
+    this.url = parsedURL.href
 
+    // If '' == this.url at this point, the constructor failed.
+  }
 
 }
