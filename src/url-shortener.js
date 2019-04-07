@@ -1,8 +1,16 @@
 const url = require('url')
+const randomstr = require('randomstring')
+// TODO: Should probably include the db functionality too...
+
 
 module.exports = class URLShortener {
+
+  /**
+   * Constructs shortener with URL string and validates it.
+   * @param urlString
+   */
   constructor(urlString) {
-    // Defines class properties.
+
     this.url = ''
 
     // Validates URL.
@@ -19,4 +27,16 @@ module.exports = class URLShortener {
     // If '' == this.url at this point, the constructor failed.
   }
 
+  /**
+   * Shorten URL (set at constructor)
+   * Returns short URL or false if there is a problem URLShortener doesn't have a valid URL to shorten.
+   * TODO: @throws...
+   */
+  new() {
+    if ('' == this.url)
+      throw new Error("This object doesn't have a valid URL to shorten.")  // See `constructor`
+
+    // 2.2 Create new short URL
+    return randomstr.generate(7)
+  }
 }

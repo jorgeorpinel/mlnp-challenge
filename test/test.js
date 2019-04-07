@@ -25,11 +25,11 @@ describe('URLShortener', function() {
     })
   })
 
-  describe('#indexOf()', function() {
-    it('should return -1 when [1, 2, 3] has no 4th index (tautology)', function() {
-      // noinspection JSDeprecatedSymbols
-      // [1, 2, 3].indexOf(4).should.equal(-1)
-      should([1, 2, 3].indexOf(4)).be.exactly(-1)
+  describe('#new()', function() {
+    it('should create a String that is 7 characters long (when URL is valid)', function() {
+      permalink = new URLShortener('http://url.com/').new()
+      permalink.constructor.name.should.equal('String')
+      permalink.should.have.length(7)
     })
   })
 })
